@@ -13,9 +13,10 @@
         <title>365Plan</title>
         <style>
             body{padding-bottom: 6.3rem;}
-            h2{text-align: center;color: #CFB283;}
+            h2{text-align: center;color: #CFB283;margin-bottom: 0;}
             .totalMoney{width: 90%;margin: 0 auto;text-align: right;}
             .totalMoney em{color: #CFB283;}
+            .actTime{text-align: center;margin:.3rem; font-size: .9rem;}
             table{width: 90%;margin: 1.0rem auto;text-align: center;}
             td em{border: 1px solid #d3d3d3;width: 90%;display: inline-block;margin: 0 auto;height: 1.5rem;line-height: 1.5rem;border-radius: .75rem;color: #999;margin-bottom: .2rem;}
             td em.saved{background: #CFB283;color: #ffffff;border-color: #CFB283;}
@@ -28,6 +29,7 @@
     </head>
     <body>
         <h2>365天存钱￥计划</h2>
+        <p class="actTime"></p>
         <p class="totalMoney">目前我存了 <em></em> 元啦 >></p>
         <div class="saveTable">
             <table cellspacing="0" cellpadding="0" border="0"></table>
@@ -62,6 +64,12 @@
                 $('#money'+currentSave).removeClass('noSaved');
                 totalMoney += currentSave;
                 $('.totalMoney em').text(totalMoney);
+                if(savedMoney.length == 1){
+                    var _start = new Date(JSON.parse(savedMoney[0]).date);
+                    var _startTime = _start.getFullYear()+'.'+(_start.getMonth()+1)+'.'+_start.getDate();
+                    var _endTime = (_start.getFullYear()+1)+'.'+(_start.getMonth()+1)+'.'+_start.getDate();
+                    $('.actTime').text('('+_startTime+'-'+_endTime+')');
+                }
             });
         });
         function initTable(){
@@ -74,6 +82,12 @@
                 if(_i % 6 == 0) _html += '</tr>';
             }
             $('table').html(_html);
+            if(savedMoney.length > 0){
+                var _start = new Date(JSON.parse(savedMoney[0]).date);
+                var _startTime = _start.getFullYear()+'.'+(_start.getMonth()+1)+'.'+_start.getDate();
+                var _endTime = (_start.getFullYear()+1)+'.'+(_start.getMonth()+1)+'.'+_start.getDate();
+                $('.actTime').text('('+_startTime+'-'+_endTime+')');
+            }
             for(var _i = 0; _i < savedMoney.length; _i++){
                 if(savedMoney[_i]){
                     totalMoney += Number(JSON.parse(savedMoney[_i]).money);
