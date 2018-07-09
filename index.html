@@ -30,6 +30,8 @@
             #chartBox table{border: 1px solid #d3d3d3; color: #999;border-radius: .3rem;}
             #chartBox table thead{background: #d3d3d3; color: #ffffff;}
             #chartBox table tr{height: 2.2rem;}
+            #chartBox table tr td:last-child{color: #CFB283;}
+            #chartBox table #noData{font-size: .9rem;}
             .clearAll{position: fixed;right: 0;top: 30%;width: 1.0rem;padding: .2rem;background: #CFB283;color: #ffffff;font-size: .5rem;text-align: center;border-top-left-radius: .5rem;border-bottom-left-radius: .5rem;}
             .maskBk{position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0, 0, 0, .6);}
             .alertContent{position: fixed;width: 15rem;background: rgba(255, 255, 255, .9);top: 40%;margin: 0 auto;left: 0;right: 0; text-align: center; font-size: .9rem;border-radius: .5rem;}
@@ -131,6 +133,10 @@
             $('.alertContent .btns .ok').bind('click', function(){
                 clearAll();
             });
+            $('.alertContent .btns .close').bind('click', function(){
+                $('.maskBk').fadeOut();
+                $('.alertContent').fadeOut();
+            });
         });
         function initTable(){
             //获取localstorage内保存的数据
@@ -185,6 +191,7 @@
             savedMoney = [];            
             window.localStorage.savedMoney = JSON.stringify(savedMoney);
             initTable();
+            updateList();
             $('.maskBk').fadeOut();
             $('.alertContent').fadeOut();
         }
