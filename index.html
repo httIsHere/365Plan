@@ -25,17 +25,56 @@
             .bottomBox{background: #ffffff;border-top: 1px solid #d3d3d3;padding: .5rem 0;position:fixed;left: 0;right: 0;bottom: 0;}
             .saveBtn{width: 90%;display: block;margin: 0 auto;height: 3.0rem;background: #CFB283;color: #ffffff;text-decoration: none;line-height: 3.0rem;text-align: center;font-size: 1.3rem;}
             .disNone{display: none;}
+            .smallTip{position: fixed;background: rgba(0, 0, 0, .6);color: #ffffff;padding: .5rem;left: 0;right: 0;margin: 0 auto;border-radius: .3rem;width: 4.5rem;bottom:-2.5rem;}
+            .smallTip p{margin: 0;}
+            #chartBox table{border: 1px solid #d3d3d3; color: #999;border-radius: .3rem;}
+            #chartBox table thead{background: #d3d3d3; color: #ffffff;}
+            #chartBox table tr{height: 2.2rem;}
+            .clearAll{position: fixed;right: 0;top: 30%;width: 1.0rem;padding: .2rem;background: #CFB283;color: #ffffff;font-size: .5rem;text-align: center;border-top-left-radius: .5rem;border-bottom-left-radius: .5rem;}
+            .maskBk{position: fixed;top: 0;bottom: 0;left: 0;right: 0;background: rgba(0, 0, 0, .6);}
+            .alertContent{position: fixed;width: 15rem;background: rgba(255, 255, 255, .9);top: 40%;margin: 0 auto;left: 0;right: 0; text-align: center; font-size: .9rem;border-radius: .5rem;}
+            .alertContent p:nth-child(2){padding: 0 .7rem;}
+            .alertContent .btns{border-top: 1px solid #999;margin: 0;}
+            .alertContent .btns span{display: inline-block;padding: .5rem 0;width: 48%;color: #CFB283;}
+            .alertContent .btns span.close{border-right: 1px solid #999;color: #333333;}
         </style>
     </head>
     <body>
         <h2>365天存钱￥计划</h2>
         <p class="actTime"></p>
         <p class="totalMoney">目前我存了 <em></em> 元啦 >></p>
+        <div class="clearAll">清空全部</div>
         <div class="saveTable">
-            <table cellspacing="0" cellpadding="0" border="0"></table>
+            <table cellspacing="0" cellpadding="0" border="0" id="moneyTable"></table>
             <div class="bottomBox disNone">
                 <p class="warmTip">你要存下 <span></span> 这笔钱吗？</p>
                 <a href="javascript:;" class="saveBtn">狠心存下</a>
+            </div>
+        </div>
+        <div class="saveGraph disNone">
+            <div id="chartBox">
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <thead>
+                        <tr><th>日期</th><th>单日存储</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <!-- toast -->
+        <div class="smallTip">
+            <p>存下啦~</p>
+        </div>
+        <!-- 弹窗 -->
+        <div class="maskBk disNone"></div>
+        <div class="alertContent disNone">
+            <div>
+                <h3>提示</h3>
+                <p>亲亲ლ(°◕‵ƹ′◕ლ)，确定使用已存下的钱钱？</p>
+                <p class="btns">
+                    <span class="close">取消</span>
+                    <span class="ok">确定</span>
+                </p>
             </div>
         </div>
     </body>
@@ -70,6 +109,27 @@
                     var _endTime = (_start.getFullYear()+1)+'.'+(_start.getMonth()+1)+'.'+_start.getDate();
                     $('.actTime').text('('+_startTime+'-'+_endTime+')');
                 }
+                showTip();
+            });
+            $('.totalMoney').bind('click', function(){
+                var _this = $(this);
+                if(_this.hasClass('graph')){
+                    $('.saveTable').fadeIn();
+                    $('.saveGraph').fadeOut();
+                    _this.removeClass('graph');
+                } else {
+                    updateList();
+                    $('.saveTable').fadeOut();
+                    $('.saveGraph').fadeIn();
+                    _this.addClass('graph');
+                }
+            });
+            $('.clearAll').bind('click', function(){
+                $('.maskBk').fadeIn();
+                $('.alertContent').fadeIn();
+            });
+            $('.alertContent .btns .ok').bind('click', function(){
+                clearAll();
             });
         });
         function initTable(){
@@ -81,7 +141,7 @@
                 _html += '<td><em id="money'+_i+'" class="noSaved">'+_i+'</em></td>';
                 if(_i % 6 == 0) _html += '</tr>';
             }
-            $('table').html(_html);
+            $('#moneyTable').html(_html);
             if(savedMoney.length > 0){
                 var _start = new Date(JSON.parse(savedMoney[0]).date);
                 var _startTime = _start.getFullYear()+'.'+(_start.getMonth()+1)+'.'+_start.getDate();
@@ -95,6 +155,38 @@
                 }
             }
             $('.totalMoney em').text(totalMoney);
+        }
+        function showTip(){
+            var $tip = $('.smallTip');
+            $tip.animate({bottom: '50%'}, 100);
+            setTimeout(function(){
+                $tip.css('bottom', '-2.5rem');
+            }, 1000);
+        }
+        function updateList(){
+            var _list = '';
+            var _date;
+            var _realDate;
+            if(savedMoney.length > 0){
+                for(var _i = savedMoney.length - 1; _i >=0; _i--){
+                    if(savedMoney[_i]){
+                        _date = new Date(JSON.parse(savedMoney[_i]).date);
+                        _realDate = _date.getFullYear()+'.'+(_date.getMonth()+1)+'.'+_date.getDate();
+                        _list += '<tr><td>'+_realDate+'</td><td>'+JSON.parse(savedMoney[_i]).money+'元</td></tr>';
+                    }
+                }
+            } else {
+                _list += '<tr id="noData"><td colspan="2">暂无记录</td></tr>';
+            }
+            $('#chartBox table tbody').html(_list);
+        }
+        function clearAll(){
+            totalMoney = 0;
+            savedMoney = [];            
+            window.localStorage.savedMoney = JSON.stringify(savedMoney);
+            initTable();
+            $('.maskBk').fadeOut();
+            $('.alertContent').fadeOut();
         }
     </script>
 </html>
